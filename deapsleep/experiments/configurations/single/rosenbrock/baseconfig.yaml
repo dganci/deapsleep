@@ -1,0 +1,38 @@
+dirname: 'deapsleep/experiments/results/single'
+problem: 'rosenbrock'
+n_runs: 50
+n_var: null # default=2
+seed: 42
+use_opt_config: false
+save_results: true
+aggregation_op: 'median'
+version: 'baseline'
+
+base:
+  initparams:
+    ind_type: list
+    weights: [-1.0]
+    pop_type: list
+    pop_size: 200
+  evolparams:
+    n_obj: 1
+    hof: 20
+    mate: 'cxOnePoint'
+    cxpb: 0.75
+    mutate: 'mutGaussian'
+    mu: 0
+    sigma: 0.5
+    mutpb: 0.1
+    indpb: 0.75
+    select: 'selTournament'
+    tournsize: 2
+    replacement_operator: 'mu_plus_lambda'
+    ngen: 1000
+    statparams:
+      - 'mean'
+      - 'std'
+      - 'min'
+      - 'max'
+      - 'med'
+      - 'q1'
+      - 'q3'

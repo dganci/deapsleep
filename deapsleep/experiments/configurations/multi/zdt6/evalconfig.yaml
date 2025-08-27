@@ -1,0 +1,19 @@
+dirname: 'deapsleep/experiments/results'
+problem: 'zdt6'
+probtype: 'multi'
+version1: 'base'
+version2: null
+aggregation_op: 'median'
+
+stat: 'min'
+
+symlog_thresh: null
+y_upper_range: null
+y_lower_range: null
+
+use_ref_point: true
+n_obj: 2
+P: 27  # for population size = 200
+
+# Statistical test
+gen_target: -1

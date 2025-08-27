@@ -1,0 +1,31 @@
+initparams:
+  pop_size:
+    type: int
+    low: 50
+    high: 300
+
+evolparams:
+  # crossover
+  mate: cxOnePoint
+  cxpb: 0.75
+  # mutation
+  mu: 0.0
+  sigma:
+    type: float
+    low: 0.1
+    high: 0.3
+  mutpb:
+    type: float
+    low: 0.01
+    high: 0.2
+  indpb:
+    type: float
+    low: 0.3
+    high: 1.0
+    # selection
+  tournsize:
+    type: int
+    low: 2
+    high: 5
+    # termination
+  ngen: 100

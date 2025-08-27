@@ -1,0 +1,44 @@
+dirname: 'deapsleep/experiments/results/multi'
+problem: 'zdt3'
+n_runs: 50
+n_var: null # default=30
+seed: 42
+use_opt_config: false
+save_results: true
+aggregation_op: 'median'
+version: 'baseline'
+
+base:
+  initparams:
+    ind_type: list
+    weights: [-1.0, -1.0]
+    pop_type: list
+    pop_size: 200
+  evolparams:
+    n_obj: 2
+    hof: 20
+    # crossover
+    mate: 'cxSimulatedBinaryBounded'
+    eta_cx: 15
+    cxpb: 0.75
+    # mutation
+    mutate: 'mutPolynomialBounded'
+    eta_mut: 15
+    mutpb: 0.1
+    indpb: 0.75
+    # selection 
+    select: 'selNSGA2'
+    # replacement
+    replacement_operator: 'mu_plus_lambda_nsga2'
+    nd: 'standard'
+    # termination
+    ngen: 1000
+    # statistics
+    statparams:
+      - 'mean'      
+      - 'std'
+      - 'min'
+      - 'max'
+      - 'med'
+      - 'q1'
+      - 'q3'
