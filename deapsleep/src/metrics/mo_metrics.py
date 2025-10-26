@@ -1,16 +1,13 @@
 import os
 import warnings
-
 import numpy as np
 import pandas as pd
 from math import hypot, sqrt
-
 try:
     from scipy.spatial.distance import cdist
     _scipy_available = True
 except ImportError:
     _scipy_available = False
-
 try:
     # try importing the C version
     from deap.tools._hypervolume import hv

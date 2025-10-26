@@ -4,23 +4,9 @@ probtype: 'single'
 version1: 'baseline'
 version2: null
 aggregation_op: 'median'
+save_full: false
 
 stat: 'min'
-
 symlog_thresh: null
 y_upper_range: null
 y_lower_range: null
-
-# ACR parameters
-
-target: 0.0
-max_gen: null
-
-# FTRT parameters
-thr: null
-
-# FBP parameters
-budget: null
-
-# Statistical test
-gen_target: -1

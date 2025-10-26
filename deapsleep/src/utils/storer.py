@@ -5,10 +5,8 @@ import pandas as pd
 
 from collections import defaultdict
 from collections.abc import Iterable
-
 from deap.tools import Logbook
-
-from deapsleep.src.utils.visualizer import Visualizer
+from .visualizer import Visualizer
 
 class Storer(Visualizer):
     '''
@@ -61,18 +59,6 @@ class Storer(Visualizer):
         '''
         self.paretos.append([tuple(ind.fitness.values) for ind in archive])
 
-    def add_targets(self, targets):
-        '''
-        Store ideal/target values for plotting.
-        '''
-        self.targets = targets
-
-    def add_true_pareto(self, true_pareto):
-        '''
-        Store true Pareto front for comparison.
-        '''
-        self.true_pareto = true_pareto
-
     def _aggregate(self, op: str, fmt: str = '{:.2e} \u00B1 {:.2e}'):
         '''
         Aggregate logbooks across runs using 'op' ('mean' or 'median'):
@@ -109,21 +95,16 @@ class Storer(Visualizer):
         self.num_agg = num_log
         self.fmt_agg = pd.DataFrame(fmt_rows, index=pd.Index(range(n_gen), name='Generation'))
 
-    def save(self, stat: str = 'min', n_obj: int = 1, op: str = 'median'):
+    def save(self, stat: str = 'min', op: str = 'median'):
         '''
         Create output directory and save:
           - raw loglist as 'log_list.pkl'
           - aggregated logbook (pickle + CSV)
           - best individuals per run (pickle + CSV)
-          - last statistics per run (CSV + boxplot)
-          - evolution plot (single-objective) or Pareto plot (multi-objective)
         '''
         os.makedirs(self.path, exist_ok=True)
         if not self.loglist:
             raise ValueError('No logbooks to save.')
-
-        ngen = len(self.statres[stat][0])
-        nvar = len(self.evolres['best'][0][0])
 
         # 1. Save raw loglist
         with open(os.path.join(self.path, 'log_list.pkl'), 'wb') as f:
@@ -133,20 +114,7 @@ class Storer(Visualizer):
         self._aggregate(op)
         with open(os.path.join(self.path, f'log_{op}.pkl'), 'wb') as f:
             pickle.dump(self.num_agg, f)
-        self.saveCSV(self.fmt_agg, filename=f'log_{op}', index_name='Generation')
 
         # 3. Save best individuals
         with open(os.path.join(self.path, 'hof.pkl'), 'wb') as f:
             pickle.dump(self.evolres, f)
-        self.saveCSV(self.evolres, filename='best_individuals', index_name='Run')
-
-        # 4. Save last statistics
-        self.saveCSV(self.lastats, filename='last_stats', index_name='Run')
-        self.lastatbox(self.lastats, targets=getattr(self, 'targets', None), ngen=ngen, nvar=nvar)
-
-        # 5. Plot evolution or Pareto
-        if n_obj == 1:
-            self.plotEvolution(self.statres, stat, targets=getattr(self, 'targets', None), agg_op=op, agg_log=self.num_agg, ngen=ngen, nvar=nvar)
-        else:
-            n_runs = len(self.paretos)
-            self.plot2DPareto(self.paretos, targets=getattr(self, 'targets', None), true_pareto=getattr(self, 'true_pareto', None), n_runs=n_runs, nvar=nvar, ngen=ngen)

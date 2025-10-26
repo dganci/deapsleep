@@ -5,7 +5,14 @@ with open("requirements.txt") as f:
 
 setup(
     name="deapsleep",
-    version="0.1.0",
+    version="1.0",
     packages=find_packages(),
-    install_requires=install_requires,
+    install_requires=[
+        "tk", "pandas", "numpy", "deap", "pymoo"
+    ],
+    entry_points={
+        "console_scripts": [
+            "deapsleep = deapsleep.start:main",
+        ],
+    },
 )

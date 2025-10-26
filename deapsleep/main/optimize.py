@@ -1,17 +1,25 @@
 import os
 import pickle
 import argparse
-from operator import itemgetter
-
-from deapsleep.src.tester import test
-from deapsleep.experiments.utils import load_yaml, load_internal, parse_extra_args, apply_overrides
+import deapsleep.main as d_
 
 def run_experiment(params):
+    '''
+    Run experiments based on the provided configuration parameters.
+    '''
 
-    dirname, problem, n_runs, n_var, save_results, aggr_op, version, seed = itemgetter(
-        'dirname', 'problem', 'n_runs', 'n_var',
-        'save_results', 'aggregation_op', 'version', 'seed'
-    )(params)
+    dirname, problem, n_runs, n_var, save_results, aggr_op, version, seed = d_.extract_params(
+        params, 
+        ['dirname', 'problem'], # required keys
+        {
+            'n_runs': 30,
+            'n_var': None, 
+            'save_results': False, 
+            'aggregation_op': 'median', 
+            'version': '1.0', 
+            'seed': 42
+        } # optional keys with defaults
+    )
 
     # eventually, use a tuned configuration
     if params.get('use_opt_config', False):
@@ -26,7 +34,7 @@ def run_experiment(params):
     else:
         config = params['base']
 
-    test(
+    d_.test(
         dirname,
         problem,
         config,
@@ -38,10 +46,12 @@ def run_experiment(params):
         seed=seed
     )
 
-if __name__ == '__main__':
+def run():
     parser = argparse.ArgumentParser(
         description="Run experiments (single- or multi-run) based on a YAML configuration."
     )
+    # Configuration file argument (will load an internal configuration if --internal or --i is set)
+    # Example: --config deapsleep.ackley --i
     parser.add_argument(
         '--config', type=str, required=True,
         help="Path to the YAML configuration file."
@@ -53,12 +63,17 @@ if __name__ == '__main__':
     args, remaining = parser.parse_known_args()
 
     if args.internal:
-        params = load_internal(args.config)
+        params = d_.load_internal(args.config)
     else:
-        params = load_yaml(args.config)
+        params = d_.load_yaml(args.config)
 
-    overrides = parse_extra_args(remaining)
+    # Apply any command-line overrides
+    overrides = d_.parse_extra_args(remaining)
     if overrides:
-        apply_overrides(params, overrides)
-        
+        d_.apply_overrides(params, overrides)
+    
     run_experiment(params)
+
+if __name__ == '__main__':
+    run()
+    

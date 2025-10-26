@@ -1,13 +1,10 @@
 import os
 import yaml
 import argparse
-from operator import itemgetter
-
-import optuna
+import optuna                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 import numpy as np
-
-from deapsleep.src.tester import test
-from deapsleep.experiments.utils import mergeconfig, load_yaml
+import deapsleep.main as d_
+from operator import itemgetter
 
 def get_trial_config(trial, trial_spec):
     '''
@@ -44,10 +41,10 @@ def make_objective(base_conf, trial_spec):
         )(base_conf)
 
         trial_conf = get_trial_config(trial, trial_spec)
-        config = mergeconfig(base_conf, trial_conf)
+        config = d_.mergeconfig(base_conf, trial_conf)
         config.setdefault('do_opt', True)
 
-        minima = test(
+        minima = d_.test(
             n_runs=n_runs,
             probname=problem,
             config=config,
@@ -77,13 +74,13 @@ def find_best_params(base_conf, trial_spec, n_trials):
     return study.best_params
 
 def main(base_yaml, trial_yaml, n_trials=50):
-    base_conf = load_yaml(base_yaml)
-    trial_spec = load_yaml(trial_yaml)
+    base_conf = d_.load_yaml(base_yaml)
+    trial_spec = d_.load_yaml(trial_yaml)
 
     dirname, problem = itemgetter('dirname', 'problem')(base_conf)
 
     best_params = find_best_params(base_conf, trial_spec, n_trials)
-    final_conf = mergeconfig(base_conf, best_params)
+    final_conf = d_.mergeconfig(base_conf, best_params)
 
     out_path = os.path.join(dirname, problem, f"{problem}_best_config.yaml")
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
@@ -92,7 +89,7 @@ def main(base_yaml, trial_yaml, n_trials=50):
 
     print(f"Best configuration saved to: {out_path}")
 
-if __name__ == '__main__':
+def run():
     parser = argparse.ArgumentParser(
         description="Optimize hyperparameters via Optuna using base + trial YAML configs."
     )
@@ -111,3 +108,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     main(args.base, args.trial, args.n_trials)
+
+if __name__ == '__main__':
+    run()

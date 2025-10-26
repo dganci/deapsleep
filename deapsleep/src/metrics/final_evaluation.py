@@ -4,11 +4,10 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-
-from matplotlib.patches import Patch
-from matplotlib.lines import Line2D
 import matplotlib.gridspec as gridspec
 from functools import partial
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 
 class FinalEvaluation:
     '''
@@ -87,9 +86,7 @@ class FinalEvaluation:
         Returns a dict: {version: [array of fronts per run]}
         '''
         fronts = {}
-        # Primo livello: Version
         for version, df_ver in self.df.groupby('Version'):
-            # Lista dei fronti, uno per run
             run_fronts = []
             for _, df_run in df_ver.groupby('Run'):
                 arr = df_run[self.fitness_cols].to_numpy(dtype=float)
@@ -99,6 +96,9 @@ class FinalEvaluation:
         return fronts
     
     def _combine_distrib(self):
+        '''
+        Combine two DataFrame distributions into a single DataFrame for plotting.
+        '''
 
         df1 = pd.DataFrame(self.d1)
         df1['Run'] = df1.index + 1
@@ -118,6 +118,9 @@ class FinalEvaluation:
         )
 
     def plot_scatterplot(self, d1, d2, path: str = None, filename: str = None):
+        '''
+        Scatterplot of two distributions side by side, one point per run.
+        '''
 
         self.d1 = d1
         self.d2 = d2
@@ -178,9 +181,6 @@ class FinalEvaluation:
         '''
         Group by ('Run', 'Version') and compute summary stats for one or more fitness columns.
 
-        Parameters:
-        - fitness_cols: list of column names to aggregate. If None, infer all columns starting with 'Fitness'.
-
         Returns:
         - DataFrame with one row per (Run, Version) and one column per statistic per fitness column.
         '''
@@ -219,6 +219,9 @@ class FinalEvaluation:
         self.grouped = grouped
 
     def plot_boxplots(self, path: str, filename: str, obj: int = 0):
+        '''
+        Plot side-by-side boxplots of best objective values per run/version.
+        '''
         runs = sorted(self.grouped['Run'].unique())
         n_best = int(self.grouped[f"{self.fitness_cols[obj]}_Count"].unique()[0])
         group_centers = np.arange(len(runs))
@@ -231,21 +234,8 @@ class FinalEvaluation:
         }
         box_width = 0.4
 
-        use_broken = (
-            isinstance(self.y_lower_range, (list, tuple)) and
-            isinstance(self.y_upper_range, (list, tuple))
-        )
-
-        if use_broken:
-            fig = plt.figure(figsize=(12, 8))
-            fig.tight_layout()
-            gs = gridspec.GridSpec(2, 1, height_ratios=[1, 3], hspace=0.05)
-            ax_top = fig.add_subplot(gs[0])
-            ax_bot = fig.add_subplot(gs[1], sharex=ax_top)
-            axes = (ax_top, ax_bot)
-        else:
-            fig, ax_main = plt.subplots(figsize=(12, 8))
-            axes = (ax_main,)
+        fig, ax_main = plt.subplots(figsize=(12, 8))
+        axes = (ax_main,)
 
         for ax in axes:
             for i, run in enumerate(runs):
@@ -276,44 +266,31 @@ class FinalEvaluation:
                         meanprops={'color': 'black', 'linestyle': '--', 'linewidth': 1.5},
                         medianprops={'color': 'black', 'linewidth': 2})
 
-        for ax in axes:
-            # (a) target lines
-            for tval in (self.targets or []):
-                ax.axhline(y=float(tval), color='red', linestyle='--', linewidth=1)
-
-            # (b) symlog (if not broken)
-            if not use_broken and self.symlog_thresh is not None:
-                ax.set_yscale('symlog', linthresh=float(self.symlog_thresh))
-
-            '''# (c) y-axis limits
-            ymin, ymax = ax.get_ylim()
-            for tval in (self.targets or []):
-                ymin = min(ymin, float(tval))
-                ymax = max(ymax, float(tval))
-            ax.set_ylim(ymin, ymax)'''
-
-            # (d) grid
-            ax.grid(axis='y', linestyle='--', alpha=0.7)
-
-        bottom_ax = axes[-1]
-        bottom_ax.set_xticks(group_centers)
-        bottom_ax.set_xticklabels([str(r) if r in (1, len(runs)) or r % 5 == 0 else ''
+        btm_ax = axes[-1]
+        btm_ax.set_xticks(group_centers)
+        btm_ax.set_xticklabels([str(r) if r in (1, len(runs)) or r % 5 == 0 else ''
                                 for r in runs])
         for x in range(1, len(runs)):
-            bottom_ax.axvline(x=x - 0.5, color='gray', linestyle=':', alpha=0.5)
-
+            btm_ax.axvline(x=x - 0.5, color='gray', linestyle=':', alpha=0.5)
+        btm_ax.grid(axis='y', linestyle='--', alpha=0.7)
+                
         handles = [
             Patch(facecolor=colors[self.v1], alpha=0.7, label=self.v1),
             Patch(facecolor=colors[self.v2], alpha=0.7, label=self.v2),
             Line2D([0], [0], color='black', linestyle='--', label='Mean'),
             Line2D([0], [0], color='black', linewidth=2, label='Median')
         ]
-        for tval in (self.targets or []):
-            handles.append(Line2D([0], [0], color='red', lw=1, linestyle='--',
-                                label=f'Target = {tval}'))
-        bottom_ax.legend(handles=handles, loc='best')
 
-        titlepos = bottom_ax.get_position().x0 + bottom_ax.get_position().width * 0.5
+        for tval in (self.targets or []):
+            btm_ax.axhline(y=float(tval), color='red', linestyle='--', linewidth=1)
+            handles.append(Line2D([0], [0], color='red', lw=1, linestyle='--', label=f'Target = {tval}'))
+
+        # Adjust the lower y-limit to include targets if specified
+        btm_ax.set_ylim(min(self.targets) - 0.05)
+
+        btm_ax.legend(handles=handles, loc='best')
+
+        titlepos = btm_ax.get_position().x0 + btm_ax.get_position().width * 0.5
         fig.suptitle(
             rf"$\bf{{{self.probname.capitalize()}}}$ — {self.v1} vs. {self.v2} — Final Re-evaluation",
             fontsize=18, x=titlepos, y=0.995, ha='center'
@@ -321,11 +298,11 @@ class FinalEvaluation:
         fig.text(
             0.5, 0.945,
             f'Boxplot of the best {n_best} objective values per run - '
-            f'{len(runs)} runs | {self.ngen} gens | {self.nvar} variables',
+            f'{len(runs)} runs | {self.ngen} generations | {self.nvar} variables',
             ha='center', va='center', fontsize=12
         )
-        bottom_ax.set_xlabel('Run', fontsize=12)
-        bottom_ax.set_ylabel('Objective Value', fontsize=12)
+        btm_ax.set_xlabel('Run', fontsize=12)
+        btm_ax.set_ylabel('Objective Value', fontsize=12)
 
         fig.savefig(os.path.join(path, filename), dpi=300)
         plt.close(fig)
@@ -375,10 +352,10 @@ class FinalEvaluation:
                 f'{self.v1} Wins': int(counts.get('v1', 0)),
                 f'{self.v2} Wins': int(counts.get('v2', 0)),
                 'Ties': int(counts.get('Tie', 0)),
-                f'Mean best objective value across runs - {self.v1}': mean_best_v1,
-                f'Std best objective value across runs - {self.v1}': std_best_v1,
-                f'Mean best objective value across runs - {self.v2}': mean_best_v2,
-                f'Std best objective value across runs - {self.v2}': std_best_v2
+                f'Mean best objective value across runs - {self.v1}': f'{mean_best_v1:.3g}',
+                f'Std dev // - {self.v1}': f'{std_best_v1:.3g}',
+                f'Mean best objective value across runs - {self.v2}': f'{mean_best_v2:.3g}',
+                f'Std dev // - {self.v2}': f'{std_best_v2:.3g}'
             }
             if total > 0:
                 summary.update({

@@ -3,11 +3,8 @@ import numpy as np
 from tqdm.auto import tqdm
 from warnings import warn
 from pymoo.problems import get_problem
-
-from deapsleep.src.dropout import *
-from deapsleep.src.utils.storer import Storer
-from deapsleep.src.core.initializer import Initializer
-from deapsleep.src.core.evolver import Evolver
+from deapsleep.src.utils import Storer
+from deapsleep.src.core import Initializer, Evolver
 from deapsleep.experiments.utils import converter
 
 def test(
@@ -40,6 +37,9 @@ def test(
     seed        : random seed base (each run uses seed+i)
     '''
     def _set_seed(s: int):
+        '''
+        Set random seed for reproducibility.
+        '''
         random.seed(s)
         np.random.seed(s)
 
@@ -50,15 +50,10 @@ def test(
     if _pymoo:
         # Instantiate pymoo problem (with optional n_var override)
         try:
-            p = get_problem(probname, n_var=n_var) if n_var is not None else get_problem(probname)
+            p = get_problem(probname.lower(), n_var=n_var) if n_var is not None else get_problem(probname.lower())
         except TypeError:
-            p = get_problem(probname)
+            p = get_problem(probname.lower())
             warn(f"\n{probname} does not support 'n_var'; using default n_var={p.n_var}.\n")
-
-        # Save ideal point and Pareto front (for multi-objective)
-        storer.add_targets(p.ideal_point())
-        if p.n_obj > 1:
-            storer.add_true_pareto(p.pareto_front())
 
         # Attach problem instance to evolparams
         config['evolparams']['problem'] = p
@@ -66,6 +61,7 @@ def test(
         # Build initializer attributes from problem bounds
         attr, func = converter[p.vtype]
         initattr = [[attr, func, lb, ub] for lb, ub in zip(p.xl, p.xu)]
+        print(initattr)
 
     else:
         initattr = config['initattr']
@@ -96,4 +92,4 @@ def test(
         return storer.lastats['min']
 
     if save_results:
-        storer.save(n_obj=p.n_obj, op=aggr_op)
+        storer.save(op=aggr_op)

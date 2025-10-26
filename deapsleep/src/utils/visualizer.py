@@ -5,9 +5,8 @@ import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
 from matplotlib.lines import Line2D
-from deapsleep.experiments.utils import format_version
+from deapsleep.experiments import format_version
 
 class Visualizer:
     '''
@@ -21,7 +20,7 @@ class Visualizer:
         self.dirname = dirname
         self.probname = probname
         self.version = format_version(version)
-        self.path = os.path.join(dirname, probname, version)
+        self.path = os.path.join(dirname, probname.replace('.', os.sep), version)
         os.makedirs(self.path, exist_ok=True)
 
     def saveCSV(self, res: dict, filename: str = '', index_name: str = '') -> None:

@@ -1,0 +1,16 @@
+dirname: 'deapsleep/experiments/results'
+problem: 'zdt5'
+probtype: 'multi'
+version1: 'baseline'
+version2: null
+aggregation_op: 'median'
+save_full: false
+
+use_ref_point: true
+n_obj: 2
+P: 199  # for population size = 200
+
+stat: 'min'
+symlog_thresh: null
+y_upper_range: null
+y_lower_range: null

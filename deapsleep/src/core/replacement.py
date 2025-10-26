@@ -68,6 +68,10 @@ def random_replacement(pop, offspring) -> list:
     return pop
 
 def rand_tourn_repl(pop, offspring, k=1):
+    '''
+    Randomly selects k individuals from the population and k offspring,
+    then performs a tournament selection between each pair to choose who survives.
+    '''
     
     pop = pop[:]   
     off = offspring[:]   
@@ -94,7 +98,10 @@ def rand_tourn_repl(pop, offspring, k=1):
     return pop
 
 def iter_tourn_repl(pop, offspring, k=1):
-    
+    '''
+    Iteratively replaces random individuals in the population 
+    with offspring using tournament selection.
+    '''
     pop = pop[:]
     off = offspring[:]
 

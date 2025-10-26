@@ -11,6 +11,9 @@ class PopulationDropout:
         self.strategy = strategy
 
     def apply(self, population):
+        '''
+        Apply dropout to the population.
+        '''
         self.ori_pop = population
         nd, d = [], []
         for el in population:
@@ -21,6 +24,12 @@ class PopulationDropout:
         self.nondropped, self.dropped = nd, d
 
     def restore(self, offspring, toolbox):
+        '''
+        Restore dropped individuals according to one of this strategy (to be specified):
+          1 - non-dropped + dropped (best)
+          2 - select(non-dropped offspring, non-dropped parents) + dropped
+          3 - select(non-dropped offspring, full parents)
+        '''
 
         if self.strategy == 1:
             # 1st strategy: nd offspring + dropped
@@ -67,6 +76,9 @@ class IndividualDropout(Problem):
         self._prepare_done = False # for strategy 2
 
     def _generate_mask(self):
+        '''
+        Generate a random boolean mask.
+        '''
         mask = np.random.rand(self.n_var) >= self.rate
         if not mask.any():
             idx = np.random.randint(self.n_var)
@@ -93,6 +105,11 @@ class IndividualDropout(Problem):
         self._prepare_done = True
 
     def _evaluate(self, x, out, *args, **kwargs):
+        '''
+        A modified version of the evaluation function, taking into account dropping variables, according to one of these strategies:
+          1 - Variables removal
+          2 - Preparation and variable sobstitution (best) 
+        '''
         if self.use_dropout:
             # Save original number of variables
             ori_n_var = self.problem.n_var
@@ -157,10 +174,16 @@ class IndividualDropout(Problem):
         return out
 
     def varAnd(self, pop, toolbox, cxpb, mutpb):
+        '''
+        Variation operators adjusted for dropout.
+        '''
         orig_m = toolbox.mate
         orig_u = toolbox.mutate
 
         def sel_mate(ind1, ind2):
+            '''
+            Crossover operator only acting on non-dropped variables
+            '''
             # read masks from the individuals (fallback: all True)
             m1 = getattr(ind1, 'dropped_mask', np.ones(self.problem.n_var, dtype=bool))
             m2 = getattr(ind2, 'dropped_mask', np.ones(self.problem.n_var, dtype=bool))
@@ -182,6 +205,9 @@ class IndividualDropout(Problem):
             return ind1, ind2
 
         def sel_mut(ind):
+            '''
+            Mutation operator only acting on non-dropped variables
+            '''
             m = getattr(ind, 'dropped_mask', np.ones(self.problem.n_var, dtype=bool))
             idxs = np.where(m)[0]
             if idxs.size == 0:

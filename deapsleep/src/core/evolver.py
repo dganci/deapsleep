@@ -39,7 +39,6 @@ class Evolver:
         Adds the evaluation operator defined in the _evolve self method,
         and constraint handler if specified.
         '''
-        
         # evaluation operator
         self.toolbox.register('evaluate', self._evaluate)
 
@@ -206,7 +205,7 @@ class Evolver:
 
         if isindD:    
             self.problem = IndividualDropout(self.problem)
-            setattr(self.problem, 'strg', getattr(self, 'indD_strg', 1))
+            setattr(self.problem, 'strg', getattr(self, 'indD_strg', 2))
 
         setattr(self.problem, 'use_dropout', False)
         
