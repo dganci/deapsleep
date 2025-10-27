@@ -2,7 +2,7 @@
 DeapSleep is a DEAP-based evolutionary computation toolkit for testing dropout in genetic algorithms (GAs). Random deactivation of individuals or decision variables 
 might serve as diversity-induction mechanism, improving the algorithm’s ability to navigate rugged fitness landscapes with multiple peaks and valleys. 
 The toolkit provides a GUI for easily optimize, plot and compare the results of optimization using a vanilla or dropout-based GA. DeapSleep is fully Dockerized, 
-but using Docker is optional, as it can also be run directly from the command line.
+but using Docker is optional, although necessary for using the GUI.
 
 DeapSleep includes the following features:
 * Genetic Algorithm using DEAP implementation
