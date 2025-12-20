@@ -1,0 +1,12 @@
+services:
+  deapsleep:
+    build: .
+    container_name: deapsleep
+    working_dir: /deapsleep
+    environment:
+      - PYTHONPATH=/deapsleep 
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - ./:/deapsleep  
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    command: ["python3", "app/start.py"]

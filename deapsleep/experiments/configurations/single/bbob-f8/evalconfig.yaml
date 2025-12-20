@@ -1,0 +1,13 @@
+dirname: 'deapsleep/experiments/results/single'
+problem: 'bbob-f8'
+instance: '1'
+probtype: 'single'
+version1: 'baseline'
+version2: null
+aggregation_op: 'median'
+save_full: false
+
+stat: 'min'
+symlog_thresh: null
+y_upper_range: null
+y_lower_range: null

@@ -1,0 +1,38 @@
+initparams:
+  pop_size:
+    type: int
+    low: 50
+    high: 300
+
+evolparams:
+  # crossover
+  mate: cxSimulatedBinaryBounded
+  cxpb: 0.75
+  eta_cx:
+    type: int
+    low: 5
+    high: 20
+  # mutation
+  eta_mut:
+    type: int
+    low: 5
+    high: 20
+  sigma:
+    type: float
+    low: 0.1
+    high: 0.3
+  mutpb:
+    type: float
+    low: 0.01
+    high: 0.2
+  indpb:
+    type: float
+    low: 0.3
+    high: 1.0
+    # selection
+  tournsize:
+    type: int
+    low: 2
+    high: 5
+    # termination
+  ngen: 1000

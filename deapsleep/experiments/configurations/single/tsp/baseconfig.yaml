@@ -1,0 +1,42 @@
+dirname: 'deapsleep/experiments/results/single'
+problem: 'tsp'
+n_runs: 30
+n_var: 30
+seed: 42
+use_opt_config: false
+save_results: true
+aggregation_op: 'median'
+version: 'baseline'
+
+base:
+  initparams:
+    ind_type: list
+    weights: [-1.0] 
+    pop_type: list
+    pop_size: 200
+    is_permutation: true
+  evolparams:
+    n_obj: 1
+    hof: 20
+    mate: 'cxOrdered'
+    cxpb: 0.75
+    mutate: 'mutShuffleIndexes'
+    mutpb: 0.03
+    indpb: 0.75
+    select: 'selTournament'
+    tournsize: 2
+    replacement_operator: 'mu_plus_lambda'
+    ngen: 100
+    statparams:
+      - 'mean'
+      - 'std'
+      - 'min'
+      - 'max'
+      - 'med'
+      - 'q1'
+      - 'q3'
+    indD_strg: 'permute_tsp' # random bits rearrangemnt strategy for individual dropout
+    before_evaluation_repair: repair_start_from_zero
+    after_variation_repair: repair_start_from_zero
+additional:
+    generator: 'pymoo.problems.single.traveling_salesman.create_random_tsp_problem' # random generator for tsp problem

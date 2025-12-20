@@ -1,0 +1,43 @@
+dirname: 'deapsleep/experiments/results/single'
+problem: 'knp'
+n_runs: 30
+n_var: null
+seed: 42
+use_opt_config: false
+save_results: true
+aggregation_op: 'median'
+version: 'baseline'
+
+base:
+  initparams:
+    ind_type: list
+    weights: [-1.0] # in pymoo, knapsack is turned into a minimization problem
+    pop_type: list
+    pop_size: 200
+  evolparams:
+    n_obj: 1
+    hof: 20
+    mate: 'cxOnePoint'
+    cxpb: 0.75
+    mutate: 'mutFlipBit'
+    mutpb: 0.03
+    indpb: 0.75
+    select: 'selTournament'
+    tournsize: 2
+    replacement_operator: 'mu_plus_lambda'
+    ngen: 20
+    statparams:
+      - 'mean'
+      - 'std'
+      - 'min'
+      - 'max'
+      - 'med'
+      - 'q1'
+      - 'q3'
+    penalty_factor: 100 # for constraint violation
+    indD_strg: 'bit_rearrange' # random bits rearrangemnt strategy for individual dropout
+additional:
+    generator: 'pymoo.problems.single.knapsack.create_random_knapsack_problem' # random generator for knapsack problem
+    W : null
+    P : null
+    C : null # usually, 40% of sum(W)
