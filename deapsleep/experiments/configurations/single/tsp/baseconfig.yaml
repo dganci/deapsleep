@@ -36,6 +36,7 @@ base:
       - 'q1'
       - 'q3'
     indD_strg: 'permute_tsp' # random bits rearrangemnt strategy for individual dropout
+    p_exempt: 0.0
     before_evaluation_repair: repair_start_from_zero
     after_variation_repair: repair_start_from_zero
 additional:

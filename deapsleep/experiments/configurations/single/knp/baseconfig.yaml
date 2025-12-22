@@ -36,6 +36,7 @@ base:
       - 'q3'
     penalty_factor: 100 # for constraint violation
     indD_strg: 'bit_rearrange' # random bits rearrangemnt strategy for individual dropout
+    p_exempt: 0.0
 additional:
     generator: 'pymoo.problems.single.knapsack.create_random_knapsack_problem' # random generator for knapsack problem
     W : null

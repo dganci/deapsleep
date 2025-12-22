@@ -184,7 +184,6 @@ def open_extra_params(parent, fixed_params, extra_params, gui_type=None, tooltip
             w.destroy()
         param_entries.remove(entry_tuple)
 
-    # ❌ Non aggiungere nulla all'apertura se extra_params è vuoto
     if extra_params.get("args"):
         for arg in extra_params["args"]:
             if "=" in arg:

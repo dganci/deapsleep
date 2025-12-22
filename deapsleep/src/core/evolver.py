@@ -82,7 +82,7 @@ class Evolver:
         '''
         self.problem.use_dropout = flag
 
-    def _set_rate(self, obj: object, rates: list[float], gen: int) -> None:
+    def _set_rate(self, obj: object, rates: list[float], gen: int) -> float:
         '''
         Set the dropout rate using an annealing exponential function, for the current generation.
         Rate edges have to be specified, otherwise dropout rate will be fixed along the generations.
@@ -103,7 +103,7 @@ class Evolver:
             curr += delta
 
         curr = np.clip(curr, 0.0, 1.0)
-        setattr(obj, 'rate', curr)
+        return curr
 
     def _evaluate(self, individual: object) -> tuple[float]:
         '''
@@ -192,7 +192,8 @@ class Evolver:
     def _evolve(self, archive: HallOfFame | ParetoFront) -> tuple[Logbook, HallOfFame | ParetoFront]:
         '''
         Core method of the Evolver class. It runs a basic or a dropout version of the genetic algorithm for
-        single- or multi-objective optimization. Depending on that, it receives a Hall of Fame or Pareto front instance,
+        single- or multi-objective optimization. Depending 
+        on that, it receives a Hall of Fame or Pareto front instance,
         in which it updates the best found solutions over n generations. Also, it saves a logbook, carrying statistical
         information about the results.
         '''
@@ -215,11 +216,13 @@ class Evolver:
             popD_strg = getattr(self, 'popD_strg', 1)
             setattr(popdrop, 'strategy', popD_strg)
 
-        if isindD:    
-            self.problem = IndividualDropout(self.problem)
-            indD_strg = getattr(self, 'indD_strg', 'substitute')
-            setattr(self.problem, 'strg', indD_strg)
-
+        if isindD:
+            self.problem = IndividualDropout(
+                self.problem,
+                strg=getattr(self, 'indD_strg', 'substitute'),
+                p_exempt=getattr(self, 'p_exempt', 0.0)
+            )
+            
         setattr(self.problem, 'use_dropout', False)
         
         # 1st evaluation (full fitness, no dropout)
@@ -235,7 +238,8 @@ class Evolver:
             # ----------------------------------------------------
             if ispopD:
                 if ispopD_ann:  # annealing
-                    self._set_rate(popdrop, self.popD_rate, gen)
+                    rate = self._set_rate(popdrop, self.popD_rate, gen)
+                    setattr(popdrop, 'rate', rate)
                 else:
                     setattr(popdrop, 'rate', self.popD_rate)
                 popdrop.apply(self.pop)
@@ -246,15 +250,17 @@ class Evolver:
 
             if isindD:
                 if isindD_ann: # annealing
-                    self._set_rate(self.problem, self.indD_rate, gen)
+                    rate = self._set_rate(self.problem, self.indD_rate, gen)
+                    setattr(self.problem, 'rate', rate)
+                    if hasattr(self.problem, 'p_exempt') and isinstance(self.problem.p_exempt, Iterable):
+                        p_exempt = self._set_rate(self.problem, self.problem.p_exempt, gen)
+                        setattr(self.problem, 'p_exempt', p_exempt)
                 else:
                     setattr(self.problem, 'rate', self.indD_rate)
-
-            # ---------------------------------------------------------------------------
-            # 2) Evaluate under individual‐level dropout (if configured)
-            #    After this call, 'population[i].fitness' is a noisy estimate via dropout
-            # ---------------------------------------------------------------------------
-            if isindD:
+                # ---------------------------------------------------------------------------
+                # 2) Evaluate under individual‐level dropout (if configured)
+                #    After this call, 'population[i].fitness' is a noisy estimate via dropout
+                # ---------------------------------------------------------------------------
                 self._set_dropout(True)
                 # force_all=True ensures we re‐evaluate everyone under dropout every gen
                 self._evalInvalid(population, force_all=True)

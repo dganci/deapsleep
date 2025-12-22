@@ -18,12 +18,10 @@ base:
     n_obj: 2
     hof: 20
     # crossover
-    mate: 'cxSimulatedBinaryBounded'
-    eta_cx: 15
+    mate: 'cxUniform'
     cxpb: 0.75
     # mutation
-    mutate: 'mutPolynomialBounded'
-    eta_mut: 15
+    mutate: 'mutFlipBit'
     mutpb: 0.1
     indpb: 0.75
     # selection 
@@ -42,3 +40,5 @@ base:
       - 'med'
       - 'q1'
       - 'q3'
+    indD_strg: 'bit_rearrange' # random bits rearrangemnt strategy for individual dropout
+    p_exempt: 0.0

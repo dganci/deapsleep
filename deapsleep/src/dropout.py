@@ -62,7 +62,7 @@ class PopulationDropout:
 
 class IndividualDropout(Problem):
 
-    def __init__(self, problem: Problem):
+    def __init__(self, problem: Problem, strg='substitute', p_exempt=0.0):
         super().__init__(
             n_var=problem.n_var,
             n_obj=problem.n_obj,
@@ -72,8 +72,10 @@ class IndividualDropout(Problem):
             xu=problem.xu,
             vtype=problem.vtype
         )
-        self.problem = problem  
-        self._prepare_done = False # for strategy 2
+        self.problem = problem
+        self.strg = strg
+        self.p_exempt= p_exempt
+        self._prepare_done = False # for "substitute" strategy
 
     def _generate_mask(self):
         '''
@@ -107,10 +109,17 @@ class IndividualDropout(Problem):
     def _evaluate(self, x, out, *args, **kwargs):
         '''
         A modified version of the evaluation function, taking into account dropping variables, according to one of these strategies:
-          1 - Variables removal
-          2 - Preparation and variable sobstitution (best) 
+        - "remove": Variables removal
+        - "substitute": Preparation and variable substitution (best)
+        - "bit_rearrange": Random bits rearrangement
+        - "permute": Permute active elements
         '''
-        if self.use_dropout:
+
+        exempt = False
+        if self.use_dropout and self.p_exempt > 0.0:
+            exempt = np.random.rand() < self.p_exempt
+
+        if self.use_dropout and not exempt:
             # Save original number of variables
             ori_n_var = self.problem.n_var
             try:
@@ -188,6 +197,8 @@ class IndividualDropout(Problem):
         
         else:
             self.problem._evaluate(x, out, *args, **kwargs)
+            np.ones(self.problem.n_var, dtype=int)
+
         return out
 
     def varAnd(self, pop, toolbox, cxpb, mutpb):

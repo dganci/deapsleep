@@ -36,3 +36,4 @@ base:
       - 'med'
       - 'q1'
       - 'q3'
+    p_exempt: 0.0

@@ -87,7 +87,6 @@ def window():
             f"--n_runs={values['n_runs']}",
             f"--ngen={values['ngen']}",
             f"--n_var={values['n_var']}",
-            #f"--dirname={RESULTS_DIR}"
         ]
         if values.get("indD_rate"): args.append(f"--indD_rate={values['indD_rate']}")
         if values.get("popD_rate"): args.append(f"--popD_rate={values['popD_rate']}")
